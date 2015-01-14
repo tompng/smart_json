@@ -91,9 +91,9 @@ module SmartJSON::ARBaseClass
     definitions << default if default
     return as_json if definitions.blank?
     json = {}
-    definitions.map{|definition|
+    definitions.each do |definition|
       SmartJSON.deep_merge json, instance_exec(&definition[:block])
-    }
+    end
     json
   end
   def as_loaded_smart_json dependencies
@@ -110,9 +110,9 @@ module SmartJSON::ARBaseClass
   end
   def as_smart_json_from_dependencies dependencies, includes
     json = as_styled_smart_json dependencies.styles
-    dependencies.each{|key, value|
+    dependencies.each do |key, value|
       json[key] = send(key).try :as_smart_json_from_dependencies, value, includes[key]
-    }
+    end
     json
   end
   def as_smart_json *options
@@ -125,9 +125,9 @@ end
 module SmartJSON::ARRelation
   def as_smart_json_from_dependencies dependencies, includes
     relations = includes(SmartJSON.hash_to_includes_options includes)
-    relations.map{|model|
+    relations.map do |model|
       model.as_loaded_smart_json dependencies
-    }
+    end
   end
   def as_smart_json *options
     dependencies, includes = klass.smart_json_dependencies options
