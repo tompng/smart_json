@@ -36,16 +36,16 @@ end
  
 module SmartJSON::ARBaseClass
   class Dependencies < Hash
-    def types
-      @types ||= []
+    def styles
+      @styles ||= []
     end
-    def types= types
-      @types = types
+    def styles= styles
+      @styles = styles
     end
   end
-  def smart_json type, &block
+  def smart_json style, &block
     @smart_json_definitions ||= {}
-    definition = smart_json_definitions[type] = {block: block}
+    definition = smart_json_definitions[style] = {block: block}
     def definition.depend_on *options
       self[:dependency] = SmartJSON.options_to_hash options
     end
@@ -55,15 +55,15 @@ module SmartJSON::ARBaseClass
     options = Array.wrap arguments
     dependencies = Dependencies.new
     includes = {}
-    options.select{|t|Symbol === t}.each do |type|
-      next if reflections[type]
-      definition = smart_json_definitions.try :[], type
+    options.select{|t|Symbol === t}.each do |style|
+      next if reflections[style]
+      definition = smart_json_definitions.try :[], style
       next if definition.nil?
-      dependencies.types << type
+      dependencies.styles << style
       dependency = definition[:dependency]
       SmartJSON.deep_merge includes, dependency if dependency
     end
-    options -= dependencies.types
+    options -= dependencies.styles
     options.reject{|o|Hash===o}.each do |name|
       dependencies[name] ||= Dependencies.new
       includes[name] ||= {}
@@ -74,19 +74,19 @@ module SmartJSON::ARBaseClass
         dep, inc = reflection.klass.smart_json_dependencies value
         depkey = dependencies[key] ||= Dependencies.new
         SmartJSON.deep_merge depkey, dep
-        depkey.types |= dep.types
+        depkey.styles |= dep.styles
         SmartJSON.deep_merge (includes[key] ||= {}), inc
       end
     end
     [dependencies, includes]
   end
- 
   ActiveRecord::Base.extend self
   ActiveRecord::Base.singleton_class.send :attr_reader, :smart_json_definitions
 end
+
 module SmartJSON::ARBaseClass
-  def as_typed_smart_json types
-    definitions = types.map{|type|self.class.smart_json_definitions[type]}
+  def as_styled_smart_json styles
+    definitions = styles.map{|style|self.class.smart_json_definitions[style]}
     default = self.class.smart_json_definitions.try :[], :default
     definitions << default if default
     return as_json if definitions.blank?
@@ -97,7 +97,7 @@ module SmartJSON::ARBaseClass
     json
   end
   def as_loaded_smart_json dependencies
-    json = as_typed_smart_json dependencies.types
+    json = as_styled_smart_json dependencies.styles
     dependencies.each do |key, value|
       child = self.send(key)
       if ActiveRecord::Relation === child
@@ -109,7 +109,7 @@ module SmartJSON::ARBaseClass
     json
   end
   def as_smart_json_from_dependencies dependencies, includes
-    json = as_typed_smart_json dependencies.types
+    json = as_styled_smart_json dependencies.styles
     dependencies.each{|key, value|
       json[key] = send(key).try :as_smart_json_from_dependencies, value, includes[key]
     }
@@ -121,6 +121,7 @@ module SmartJSON::ARBaseClass
   end
   ActiveRecord::Base.include self
 end
+
 module SmartJSON::ARRelation
   def as_smart_json_from_dependencies dependencies, includes
     relations = includes(SmartJSON.hash_to_includes_options includes)
