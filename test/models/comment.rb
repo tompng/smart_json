@@ -1,10 +1,8 @@
-ActiveRecord::Migration.class_eval do
-  create_table :comments do |t|
-    t.references :user
-    t.references :post
-    t.text :content
-    t.timestamps
-  end
+ActiveRecord::Migration.create_table :comments do |t|
+  t.references :user
+  t.references :post
+  t.text :content
+  t.timestamps
 end
 
 class Comment < ActiveRecord::Base

@@ -1,8 +1,6 @@
-ActiveRecord::Migration.class_eval do
-  create_table :users do |t|
-    t.string :name
-    t.timestamps
-  end
+ActiveRecord::Migration.create_table :users do |t|
+  t.string :name
+  t.timestamps
 end
 
 class User < ActiveRecord::Base

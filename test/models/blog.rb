@@ -1,10 +1,8 @@
-ActiveRecord::Migration.class_eval do
-  create_table :blogs do |t|
-    t.references :owner
-    t.string :title
-    t.string :slug
-    t.timestamps
-  end
+ActiveRecord::Migration.create_table :blogs do |t|
+  t.references :owner
+  t.string :title
+  t.string :slug
+  t.timestamps
 end
 
 class Blog < ActiveRecord::Base

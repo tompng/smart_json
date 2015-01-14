@@ -1,10 +1,8 @@
-ActiveRecord::Migration.class_eval do
-  create_table :profiles do |t|
-    t.references :user
-    t.string :image
-    t.text :introduction
-    t.timestamps
-  end
+ActiveRecord::Migration.create_table :profiles do |t|
+  t.references :user
+  t.string :image
+  t.text :introduction
+  t.timestamps
 end
 
 class Profile < ActiveRecord::Base

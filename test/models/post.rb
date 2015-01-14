@@ -1,11 +1,9 @@
-ActiveRecord::Migration.class_eval do
-  create_table :posts do |t|
-    t.references :blog
-    t.references :author
-    t.string :title
-    t.text :content
-    t.timestamps
-  end
+ActiveRecord::Migration.create_table :posts do |t|
+  t.references :blog
+  t.references :author
+  t.string :title
+  t.text :content
+  t.timestamps
 end
 
 class Post < ActiveRecord::Base
