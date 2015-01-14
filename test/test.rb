@@ -108,9 +108,9 @@ errors = []
 errors << 'JSON missmatch' unless a==b
 errors << 'wrong JSON' unless c[0].to_json == b.to_json.remove(/,"[a-z]+":null/)
 
-errors << "ERR sqlA count: #{c1-c0}" if c1-c0 > 8
-errors << "ERR sqlB count: #{c2-c1}" if c2-c1 > 8
-errors << "ERR sqlC count: #{c3-c2}" if c3-c2 > 8
+errors << "ERR sqlA count: #{c1-c0}" if c1-c0 != 8
+errors << "ERR sqlB count: #{c2-c1}" if c2-c1 != 8
+errors << "ERR sqlC count: #{c3-c2}" if c3-c2 != 8
 
 owner = a[:owner]
 post = a[:posts].first
