@@ -1,6 +1,12 @@
 # smart_json
 includesしなくてもN+1をちゃんとしてくれるas_jsonぽい奴
 
+Gemfile
+```ruby
+gem 'smart_json', github: 'tompng/smart_json'
+```
+
+
 sample
 ```ruby
 class Post < ActiveRecord::Base
