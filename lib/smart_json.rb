@@ -43,13 +43,18 @@ module SmartJSON::ARBaseClass
       @styles = styles
     end
   end
+  class Definition
+    attr_reader :block, :dependency
+    def initialize block
+      @block = block
+    end
+    def require *options
+      @dependency = SmartJSON.options_to_hash options
+    end
+  end
   def smart_json style, &block
     @smart_json_definitions ||= {}
-    definition = smart_json_definitions[style] = {block: block}
-    def definition.depend_on *options
-      self[:dependency] = SmartJSON.options_to_hash options
-    end
-    definition
+    smart_json_definitions[style] = Definition.new block
   end
   def smart_json_dependencies arguments
     options = Array.wrap arguments
@@ -60,7 +65,7 @@ module SmartJSON::ARBaseClass
       definition = smart_json_definitions.try :[], style
       next if definition.nil?
       dependencies.styles << style
-      dependency = definition[:dependency]
+      dependency = definition.dependency
       SmartJSON.deep_merge includes, dependency if dependency
     end
     options -= dependencies.styles
@@ -92,7 +97,7 @@ module SmartJSON::ARBaseClass
     return as_json if definitions.blank?
     json = {}
     definitions.each do |definition|
-      SmartJSON.deep_merge json, instance_exec(&definition[:block])
+      SmartJSON.deep_merge json, instance_exec(&definition.block)
     end
     json
   end

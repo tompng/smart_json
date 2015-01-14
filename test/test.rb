@@ -46,7 +46,7 @@ class Post < ActiveRecord::Base
 end
 class User < ActiveRecord::Base
   smart_json(:only_name){{name: name}}
-  smart_json(:with_image){{image: profile.try(:image)}}.depend_on(:profile)
+  smart_json(:with_image){{image: profile.try(:image)}}.require(:profile)
 end
 class Comment < ActiveRecord::Base
   smart_json(:default){{content: content}}
