@@ -29,7 +29,7 @@ module SmartJSON
         else
           {key => hash_to_includes_options(value)}
         end
-      end.compact
+      end
     end
   end
 end
