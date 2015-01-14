@@ -1,9 +1,6 @@
 module SmartJSON
   class << self
     def deep_merge hash, hash2
-      if hash.respond_to?(:types) && hash2.respond_to?(:types)
-        hash.types |= hash2.types
-      end
       hash2.each do |key, value|
         if hash[key] && Hash === value
           deep_merge hash[key], value
@@ -75,7 +72,9 @@ module SmartJSON::ARBaseClass
       hash.each do |key, value|
         reflection = reflections[key]
         dep, inc = reflection.klass.smart_json_dependencies value
-        SmartJSON.deep_merge (dependencies[key] ||= Dependencies.new), dep
+        depkey = dependencies[key] ||= Dependencies.new
+        SmartJSON.deep_merge depkey, dep
+        depkey.types |= dep.types
         SmartJSON.deep_merge (includes[key] ||= {}), inc
       end
     end
