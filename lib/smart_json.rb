@@ -119,7 +119,7 @@ module SmartJSON::ARBaseClass
   def as_styled_smart_json styles
     definitions = styles.map{|style|self.class.smart_json_definitions[style]}
     default = self.class.smart_json_definitions.try :[], :default
-    definitions << default if default
+    definitions.unshift default if default
     return as_json if definitions.blank?
     json = {}
     definitions.each do |definition|

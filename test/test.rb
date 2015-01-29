@@ -131,11 +131,11 @@ post = a[:posts].first
 author = post[:author]
 comment = post[:comments].first
 user = comment[:user]
-erros << ['owner', owner.keys] unless owner.keys == [:image]
-erros << ['post', post.keys] unless post.keys == [:title, :author, :comments]
-erros << ['author', author.keys] unless author.keys == [:name]
-erros << ['comment', comment.keys] unless comment.keys == [:content, :user]
-erros << ['user', user.keys] unless user.keys == [:name, :image]
+errors << ['owner', owner.keys] unless owner.keys == [:image]
+errors << ['post', post.keys] unless post.keys == [:title, :author, :comments]
+errors << ['author', author.keys] unless author.keys == [:name]
+errors << ['comment', comment.keys] unless comment.keys == [:content, :user]
+errors << ['user', user.keys] unless user.keys == [:name, :image]
 
 if errors.blank?
   puts :ok
