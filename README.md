@@ -1,4 +1,4 @@
-# smart_json
+# smart_json [![Build Status](https://travis-ci.org/tompng/smart_json.svg)](https://travis-ci.org/tompng/smart_json)
 includesしなくてもN+1をちゃんとしてくれるas_jsonぽい奴
 
 Gemfile

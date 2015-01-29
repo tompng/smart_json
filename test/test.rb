@@ -139,7 +139,9 @@ errors << ['user', user.keys] unless user.keys == [:name, :image]
 
 if errors.blank?
   puts :ok
+  exit 0
 else
   errors.each{|e|p e}
+  exit 1
 end
 Blog.all.as_smart_json(:all)
