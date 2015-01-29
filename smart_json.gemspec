@@ -7,4 +7,7 @@ Gem::Specification.new do |s|
   %w(activerecord json).each do |name|
     s.add_dependency name
   end
+  %w(activesupport sqlite3 pry).each do |name|
+    s.add_development_dependency name
+  end
 end
