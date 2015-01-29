@@ -11,6 +11,7 @@ sample
 ```ruby
 class Post < ActiveRecord::Base
   smart_json(:simple){{title: title}}
+  smart_json(:with_detail, :simple, author: :only_name, comments: :with_user)
 end
 class User < ActiveRecord::Base
   smart_json(:only_name){{name: name}}
@@ -18,9 +19,10 @@ class User < ActiveRecord::Base
 end
 class Comment < ActiveRecord::Base
   smart_json(:default){{content: content}}
+  smart_json(:with_user, user: [:only_name, :with_image])
 end
 
-Blog.all.as_smart_json(
+Blog.as_smart_json(
   owner: :with_image,
   posts: [
     :simple,
@@ -30,6 +32,13 @@ Blog.all.as_smart_json(
     ]
   ]
 )
+
+Blog.as_smart_json(
+  owner: :with_image,
+  posts: :with_detail
+)
+
+Post.first.as_smart_json :with_detail
 ```
 
 bad sample without smart_json

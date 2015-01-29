@@ -44,17 +44,43 @@ module SmartJSON::ARBaseClass
     end
   end
   class Definition
-    attr_reader :block, :dependency
-    def initialize block
+    attr_reader :dependency
+    def initialize klass, block, options
+      @klass = klass
       @block = block
+      @options = options
     end
     def require *options
       @dependency = SmartJSON.options_to_hash options
     end
+    def serialize model
+      if @options.present?
+        base = model.as_smart_json_from_dependencies *@klass.smart_json_dependencies(@options)
+      end
+      if @block
+        overrides = model.instance_exec &@block
+      else
+        overrides = {}
+      end
+      if base
+        SmartJSON.deep_merge base, overrides
+      else
+        overrides
+      end
+    end
+    def dependency
+      return @dependency unless @options.present?
+      dependencies, includes = @klass.smart_json_dependencies @options
+      if @dependency
+        SmartJSON.deep_merge @dependency.dup, includes
+      else
+        includes
+      end
+    end
   end
-  def smart_json style, &block
+  def smart_json style, *options, &block
     @smart_json_definitions ||= {}
-    smart_json_definitions[style] = Definition.new block
+    smart_json_definitions[style] = Definition.new self, block, options
   end
   def smart_json_dependencies arguments
     options = Array.wrap arguments
@@ -97,7 +123,7 @@ module SmartJSON::ARBaseClass
     return as_json if definitions.blank?
     json = {}
     definitions.each do |definition|
-      SmartJSON.deep_merge json, instance_exec(&definition.block)
+      SmartJSON.deep_merge json, definition.serialize(self)
     end
     json
   end
@@ -121,10 +147,14 @@ module SmartJSON::ARBaseClass
     json
   end
   def as_smart_json *options
-    dependencies, includes = self.class.smart_json_dependencies options
-    as_smart_json_from_dependencies dependencies, includes
+    as_smart_json_from_dependencies *self.class.smart_json_dependencies(options)
   end
   ActiveRecord::Base.include self
+  class << ActiveRecord::Base
+    def as_smart_json *options
+      all.as_smart_json *options
+    end
+  end
 end
 
 module SmartJSON::ARRelation
@@ -135,8 +165,7 @@ module SmartJSON::ARRelation
     end
   end
   def as_smart_json *options
-    dependencies, includes = klass.smart_json_dependencies options
-    as_smart_json_from_dependencies dependencies, includes
+    as_smart_json_from_dependencies *klass.smart_json_dependencies(options)
   end
   ActiveRecord::Relation.include self
 end
