@@ -9,13 +9,22 @@ ActiveRecord::Base.establish_connection(
   database: database
 )
 module SQLCounts
-  SQLCounts.singleton_class.send :attr_accessor, :count
-  SQLCounts.count = 0
   module M
     def exec_query *args
-      SQLCounts.count += 1
+      SQLCounts.increment_count
       super
     end
+  end
+  def self.increment_count
+    @count = count + 1
+  end
+  def self.count
+    @count ||= 0
+    return @count unless block_given?
+    before = self.count
+    out = yield
+    after = self.count
+    [after - before, out]
   end
   ActiveRecord::Base.connection.extend M
 end
@@ -63,40 +72,40 @@ class Comment < ActiveRecord::Base
   smart_json(:with_user, user: [:only_name, :with_image])
 end
 
-c0 = SQLCounts.count
-a = Blog.first.as_smart_json(
-  owner: :with_image,
-  posts: [
-    :simple,
-    author: :only_name,
-    comments: [
-      user: [:only_name, :with_image],
+c0,a0 = SQLCounts.count{
+  Blog.first.as_smart_json(
+    owner: :with_image,
+    posts: [
+      :simple,
+      author: :only_name,
+      comments: [
+        user: [:only_name, :with_image],
+      ]
     ]
-  ]
-)
-c1 = SQLCounts.count
-b = Blog.as_smart_json(
-  owner: :with_image,
-  posts: [
-    :simple,
-    author: :only_name,
-    comments: [
-      user: [:only_name, :with_image],
+  )
+}
+c1,a1 = SQLCounts.count{
+  Blog.as_smart_json(
+    owner: :with_image,
+    posts: [
+      :simple,
+      author: :only_name,
+      comments: [
+        user: [:only_name, :with_image],
+      ]
     ]
-  ]
-)[0]
-c2 = SQLCounts.count
-c = Blog.first.as_smart_json(:all)
-c3 = SQLCounts.count
+  )[0]
+}
+c2,a2 = SQLCounts.count{
+  Blog.first.as_smart_json(:all)
+}
+c3,a3 = SQLCounts.count{
+  Blog.as_smart_json(:all)[0]
+}
+
 
 class User;def image;profile.image;end;end
-ans = Blog.all.includes(
-  owner: :profile,
-  posts: [
-    :author,
-    comments: {user: :profile}
-  ]
-).as_json(
+as_json_option = {
   include: {
     owner: {only: [], methods: :image},
     posts: {
@@ -112,22 +121,35 @@ ans = Blog.all.includes(
       }
     }
   }
-)
-c4 = SQLCounts.count
+}
+class User;def image;profile.image;end;end
+cans,ans = SQLCounts.count{
+  Blog.all.includes(
+    owner: :profile,
+    posts: [
+      :author,
+      comments: {user: :profile}
+    ]
+  ).as_json(as_json_option)
+}
+cslow, = SQLCounts.count{Blog.all.as_json(as_json_option)}
 
 errors = []
 
-errors << 'JSON missmatch a b' unless a==b
-errors << 'JSON missmatch b c' unless b==c
-errors << 'wrong JSON' unless ans[0].to_json == b.to_json.remove(/,"[a-z]+":null/)
+errors << 'JSON missmatch a0 a1' unless a0==a1
+errors << 'JSON missmatch a1 a2' unless a1==a2
+errors << 'JSON missmatch a2 a3' unless a2==a3
+errors << 'wrong JSON' unless ans[0].to_json == a0.to_json.remove(/,"[a-z]+":null/)
 
-errors << "ERR sqlA count: #{c1-c0}" if c1-c0 != 8
-errors << "ERR sqlB count: #{c2-c1}" if c2-c1 != 8
-errors << "ERR sqlC count: #{c3-c2}" if c3-c2 != 8
-errors << "ERR sqlC count: #{c3-c2}" if c4-c3 != 8
+errors << "ERR sql0 count: #{c0}" if c0 != 8
+errors << "ERR sql1 count: #{c1}" if c1 != 8
+errors << "ERR sql2 count: #{c2}" if c2 != 8
+errors << "ERR sql3 count: #{c3}" if c3 != 8
+errors << "ERR sqlANS count: #{cans}" if cans != 8
+errors << "ERR sqlSLOW count: #{cslow}" if cslow == 8
 
-owner = a[:owner]
-post = a[:posts].first
+owner = a0[:owner]
+post = a0[:posts].first
 author = post[:author]
 comment = post[:comments].first
 user = comment[:user]
@@ -144,4 +166,3 @@ else
   errors.each{|e|p e}
   exit 1
 end
-Blog.all.as_smart_json(:all)
