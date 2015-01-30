@@ -53,9 +53,14 @@ module SmartJSON::ARBaseClass
     def require *options
       @dependency = SmartJSON.options_to_hash options
     end
-    def serialize model
+    def serialize model, loaded
       if @options.present?
-        base = model.as_smart_json_from_dependencies *@klass.smart_json_dependencies(@options)
+        dependencies, includes = @klass.smart_json_dependencies(@options)
+        if loaded
+          base = model.as_loaded_smart_json dependencies
+        else
+          base = model.as_smart_json_from_dependencies dependencies, includes
+        end
       end
       if @block
         overrides = model.instance_exec &@block
@@ -116,14 +121,14 @@ module SmartJSON::ARBaseClass
 end
 
 module SmartJSON::ARBaseClass
-  def as_styled_smart_json styles
+  def as_styled_smart_json styles, loaded=true
     definitions = styles.map{|style|self.class.smart_json_definitions[style]}
     default = self.class.smart_json_definitions.try :[], :default
     definitions.unshift default if default
     return as_json if definitions.blank?
     json = {}
     definitions.each do |definition|
-      SmartJSON.deep_merge json, definition.serialize(self)
+      SmartJSON.deep_merge json, definition.serialize(self, loaded)
     end
     json
   end
@@ -140,7 +145,7 @@ module SmartJSON::ARBaseClass
     json
   end
   def as_smart_json_from_dependencies dependencies, includes
-    json = as_styled_smart_json dependencies.styles
+    json = as_styled_smart_json dependencies.styles, false
     dependencies.each do |key, value|
       json[key] = send(key).try :as_smart_json_from_dependencies, value, includes[key]
     end
