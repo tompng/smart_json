@@ -116,11 +116,14 @@ module SmartJSON::ARBaseClass
     end
     [dependencies, includes]
   end
+  def as_smart_json *options
+    all.as_smart_json *options
+  end
   ActiveRecord::Base.extend self
   ActiveRecord::Base.singleton_class.send :attr_reader, :smart_json_definitions
 end
 
-module SmartJSON::ARBaseClass
+module SmartJSON::ARBase
   def as_styled_smart_json styles, loaded=true
     definitions = styles.map{|style|self.class.smart_json_definitions[style]}
     default = self.class.smart_json_definitions.try :[], :default
@@ -155,11 +158,6 @@ module SmartJSON::ARBaseClass
     as_smart_json_from_dependencies *self.class.smart_json_dependencies(options)
   end
   ActiveRecord::Base.include self
-  class << ActiveRecord::Base
-    def as_smart_json *options
-      all.as_smart_json *options
-    end
-  end
 end
 
 module SmartJSON::ARRelation
