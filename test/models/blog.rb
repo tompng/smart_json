@@ -2,7 +2,7 @@ ActiveRecord::Migration.create_table :blogs do |t|
   t.references :owner
   t.string :title
   t.string :slug
-  t.timestamps
+  t.timestamps null: false
 end
 
 class Blog < ActiveRecord::Base

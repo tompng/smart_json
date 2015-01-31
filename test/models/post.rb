@@ -3,7 +3,7 @@ ActiveRecord::Migration.create_table :posts do |t|
   t.references :author
   t.string :title
   t.text :content
-  t.timestamps
+  t.timestamps null: false
 end
 
 class Post < ActiveRecord::Base

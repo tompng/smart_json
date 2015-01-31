@@ -1,6 +1,6 @@
 ActiveRecord::Migration.create_table :users do |t|
   t.string :name
-  t.timestamps
+  t.timestamps null: false
 end
 
 class User < ActiveRecord::Base

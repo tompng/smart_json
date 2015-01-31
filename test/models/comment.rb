@@ -2,7 +2,7 @@ ActiveRecord::Migration.create_table :comments do |t|
   t.references :user
   t.references :post
   t.text :content
-  t.timestamps
+  t.timestamps null: false
 end
 
 class Comment < ActiveRecord::Base
