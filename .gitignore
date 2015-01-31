@@ -1,2 +1,3 @@
-test.sqlite3
-smart_json-*.gem
+*.gem
+Gemfile.lock
+*.sqlite3
