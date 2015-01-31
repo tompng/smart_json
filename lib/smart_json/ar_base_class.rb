@@ -72,7 +72,7 @@ module SmartJSON::ARBaseClass
     end
     options.select{|o|Hash===o}.each do |hash|
       hash.each do |key, value|
-        reflection = reflections[key.to_s]
+        reflection = reflections[key.to_s] || reflections[key.to_sym]
         dep, inc = reflection.klass.smart_json_dependencies value
         depkey = dependencies[key] ||= Dependencies.new
         SmartJSON::Util.deep_merge depkey, dep
