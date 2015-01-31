@@ -6,5 +6,6 @@ rvm:
 script: bundle exec ruby test/test.rb
 gemfile:
 - Gemfile
+- gemfiles/Gemfile-activerecord-4.0.x
 - gemfiles/Gemfile-activerecord-4.1.x
 - gemfiles/Gemfile-activerecord-4.2.x

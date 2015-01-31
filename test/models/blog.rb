@@ -6,6 +6,6 @@ ActiveRecord::Migration.create_table :blogs do |t|
 end
 
 class Blog < ActiveRecord::Base
-  belongs_to :owner, class: User
+  belongs_to :owner, class_name: 'User'
   has_many :posts
 end
