@@ -4,7 +4,7 @@ module SmartJSON::ARBase
     if default
       default_definition = self.class.smart_json_definitions.try :[], :default
       definitions.unshift default_definition if default_definition
-      json = as_json unless definitions.any?(&:have_block?)
+      json = as_json unless definitions.any? &:have_block?
     end
     definitions.each do |definition|
       SmartJSON::Util.deep_merge json, definition.serialize(self, loaded: loaded, default: false)

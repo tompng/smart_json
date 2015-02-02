@@ -17,7 +17,7 @@ class SmartJSON::Definition
     @dependency = SmartJSON::Util.options_to_hash options
   end
 
-  def serialize model, loaded: loaded, default: default
+  def serialize model, loaded: true, default: true
     if @options.present?
       definitions, symbols, hash = extract_smart_json_definitions @options
       base = model.as_styled_smart_json definitions, loaded: loaded, default: default
@@ -42,17 +42,17 @@ class SmartJSON::Definition
     end
   end
 
-  def includes default: true
+  def include_dependencies default: true
     return @dependency unless @options.present?
     definitions, symbols, hash = extract_smart_json_definitions @options
-    includes = @klass.smart_json_includes definitions, default: default
+    includes = @klass.smart_json_include_dependencies definitions, default: default
     symbols.each do |child|
       includes[child] ||= {}
     end
     hash.try :each do |key, value|
-      includes[key] = {}
+      includes[key] ||= {}
       reflection = @klass.reflections[key.to_s] || @klass.reflections[key]
-      SmartJSON::Util.deep_merge includes[key], SmartJSON::Definition.new(reflection.klass, value).includes
+      SmartJSON::Util.deep_merge includes[key], SmartJSON::Definition.new(reflection.klass, value).include_dependencies
     end
     if @dependency
       SmartJSON::Util.deep_merge @dependency.dup, includes
