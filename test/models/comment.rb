@@ -7,6 +7,6 @@ end
 
 class Comment < ActiveRecord::Base
   belongs_to :blog
-  belongs_to :user, class: User
+  belongs_to :user
   has_many :comments
 end

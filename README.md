@@ -10,16 +10,16 @@ gem 'smart_json', github: 'tompng/smart_json'
 sample
 ```ruby
 class Post < ActiveRecord::Base
-  smart_json(:simple){{title: title}}
-  smart_json(:with_detail, :simple, author: :only_name, comments: :with_user)
+  smart_json_style(:simple){{title: title}}
+  smart_json_style(:with_detail, :simple, author: :only_name, comments: :with_user)
 end
 class User < ActiveRecord::Base
-  smart_json(:only_name){{name: name}}
-  smart_json(:with_image){{profile: {image: profile.image}}}.require(:profile)
+  smart_json_style(:only_name){{name: name}}
+  smart_json_style(:with_image){{profile: {image: profile.image}}}.require(:profile)
 end
 class Comment < ActiveRecord::Base
-  smart_json(:default){{content: content}}
-  smart_json(:with_user, user: [:only_name, :with_image])
+  smart_json_style(:default){{content: content}}
+  smart_json_style(:with_user, user: [:only_name, :with_image])
 end
 
 Blog.as_smart_json(
