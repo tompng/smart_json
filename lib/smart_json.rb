@@ -1,5 +1,7 @@
 require 'active_record'
 module SmartJSON
+  require_relative 'smart_json/util'
+  require_relative 'smart_json/definition'
   require_relative 'smart_json/ar_relation'
   require_relative 'smart_json/ar_base'
   require_relative 'smart_json/ar_base_class'

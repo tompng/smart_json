@@ -50,26 +50,33 @@ blogs.each do |blog|
   end
 end
 require_relative '../lib/smart_json'
+
+# Blog.smart_json :default, :posts
+# Blog.smart_json :foo, :posts
+# binding.pry
+# Blog.all.as_smart_json :foo
+# exit
+
 class Blog < ActiveRecord::Base
-  smart_json(:all,
+  smart_json_style(:all,
     posts: [:simple,
       author: :only_name,
       comments: :with_user
     ]
   ){
-    {owner: owner&&{image: owner.profile.try(:image)}}
+    as_json.merge owner: owner&&{image: owner.profile.try(:image)}
   }.require(owner: :profile)
 end
 class Post < ActiveRecord::Base
-  smart_json(:simple){{title: title}}
+  smart_json_style(:simple){{title: title}}
 end
 class User < ActiveRecord::Base
-  smart_json(:only_name){{name: name}}
-  smart_json(:with_image){{image: profile.try(:image)}}.require(:profile)
+  smart_json_style(:only_name){{name: name}}
+  smart_json_style(:with_image){{image: profile.try(:image)}}.require(:profile)
 end
 class Comment < ActiveRecord::Base
-  smart_json(:default){{content: content}}
-  smart_json(:with_user, user: [:only_name, :with_image])
+  smart_json_style(:default){{content: content}}
+  smart_json_style(:with_user, user: [:only_name, :with_image])
 end
 
 c0,a0 = SQLCounts.count{
@@ -140,7 +147,6 @@ errors << 'JSON missmatch a0 a1' unless a0==a1
 errors << 'JSON missmatch a1 a2' unless a1==a2
 errors << 'JSON missmatch a2 a3' unless a2==a3
 errors << 'wrong JSON' unless ans[0].to_json == a0.to_json.remove(/,"[a-z]+":null/)
-
 errors << "ERR sql0 count: #{c0}" if c0 != 8
 errors << "ERR sql1 count: #{c1}" if c1 != 8
 errors << "ERR sql2 count: #{c2}" if c2 != 8
@@ -159,6 +165,7 @@ errors << ['author', author.keys] unless author.keys == [:name]
 errors << ['comment', comment.keys] unless comment.keys == [:content, :user]
 errors << ['user', user.keys] unless user.keys == [:name, :image]
 
+
 if errors.blank?
   puts :ok
   exit 0
@@ -166,3 +173,5 @@ else
   errors.each{|e|p e}
   exit 1
 end
+
+

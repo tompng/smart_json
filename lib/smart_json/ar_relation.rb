@@ -1,13 +1,19 @@
-require_relative 'util'
-
 module SmartJSON::ARRelation
-  def as_smart_json_from_dependencies dependencies, includes
-    relations = includes(SmartJSON::Util.hash_to_includes_options includes)
-    relations.map do |model|
-      model.as_loaded_smart_json dependencies
+  def as_styled_smart_json definitions, loaded: true, default: true
+    records = self
+    unless loaded
+      includes = klass.smart_json_includes definitions
+      records = self.includes(SmartJSON::Util.hash_to_includes_options includes)
+    end
+    records.map do |model|
+      model.as_styled_smart_json definitions, default: true
     end
   end
   def as_smart_json *options
-    as_smart_json_from_dependencies *klass.smart_json_dependencies(options)
+    definitions = [SmartJSON::Definition.new(klass, options)]
+    includes = klass.smart_json_includes definitions
+    includes(SmartJSON::Util.hash_to_includes_options includes).map do |model|
+      model.as_styled_smart_json definitions
+    end
   end
 end
