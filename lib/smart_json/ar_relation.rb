@@ -10,10 +10,6 @@ module SmartJSON::ARRelation
     end
   end
   def as_smart_json *options
-    definitions = [SmartJSON::Definition.new(klass, options)]
-    includes = klass.smart_json_includes definitions
-    includes(SmartJSON::Util.hash_to_includes_options includes).map do |model|
-      model.as_styled_smart_json definitions
-    end
+    as_styled_smart_json [SmartJSON::Definition.new(klass, options)], loaded: false
   end
 end
