@@ -42,17 +42,17 @@ class SmartJSON::Definition
     end
   end
 
-  def include_dependencies default: true
+  def includes_dependencies default: true
     return @dependency unless @options.present?
     definitions, symbols, hash = extract_smart_json_definitions @options
-    includes = @klass.smart_json_include_dependencies definitions, default: default
+    includes = @klass.smart_json_includes_dependencies definitions, default: default
     symbols.each do |child|
       includes[child] ||= {}
     end
     hash.try :each do |key, value|
       includes[key] ||= {}
       reflection = @klass.reflections[key.to_s] || @klass.reflections[key]
-      SmartJSON::Util.deep_merge includes[key], SmartJSON::Definition.new(reflection.klass, value).include_dependencies
+      SmartJSON::Util.deep_merge includes[key], SmartJSON::Definition.new(reflection.klass, value).includes_dependencies
     end
     if @dependency
       SmartJSON::Util.deep_merge @dependency.dup, includes

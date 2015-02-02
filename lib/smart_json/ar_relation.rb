@@ -2,7 +2,7 @@ module SmartJSON::ARRelation
   def as_styled_smart_json definitions, loaded: true, default: true
     records = self
     unless loaded
-      includes = klass.smart_json_include_dependencies definitions
+      includes = klass.smart_json_includes_dependencies definitions
       records = self.includes(SmartJSON::Util.hash_to_includes_options includes)
     end
     records.map do |model|
