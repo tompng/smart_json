@@ -51,12 +51,6 @@ blogs.each do |blog|
 end
 require_relative '../lib/smart_json'
 
-# Blog.smart_json :default, :posts
-# Blog.smart_json :foo, :posts
-# binding.pry
-# Blog.all.as_smart_json :foo
-# exit
-
 class Blog < ActiveRecord::Base
   smart_json_style(:all,
     posts: [:simple,
