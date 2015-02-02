@@ -12,10 +12,10 @@ module SmartJSON::Util
     end
     def options_to_hash options
       out = {}
-      options.reject{|o|Hash===o}.each do |name|
+      options.grep Symbol do |name|
         out[name] = {}
       end
-      options.select{|o|Hash===o}.each do |hash|
+      options.grep Hash do |hash|
         hash.each do |name, value|
           out[name] = options_to_hash [*value]
         end
