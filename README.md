@@ -43,7 +43,7 @@ Post.first.as_smart_json :with_detail
 
 bad sample without smart_json
 ```ruby
-Blog.all.includes(
+Blog.includes(
   owner: :profile,
   posts: [
     :author,
