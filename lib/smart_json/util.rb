@@ -17,19 +17,23 @@ module SmartJSON::Util
       end
       options.grep Hash do |hash|
         hash.each do |name, value|
-          out[name] = options_to_hash [*value]
+          out[name] = options_to_hash Array.wrap(value)
         end
       end
       out
     end
     def hash_to_includes_options hash
-      hash.map do |key, value|
+      array_options = []
+      hash_options = {}
+      hash.each do |key, value|
         if value.empty?
-          key
+          array_options << key
         else
-          {key => hash_to_includes_options(value)}
+          hash_options[key] = hash_to_includes_options value
         end
       end
+      array_options << hash_options if hash_options.present?
+      array_options
     end
   end
 end
