@@ -52,6 +52,7 @@ end
 require_relative '../lib/smart_json'
 
 class Blog < ActiveRecord::Base
+  smart_json_style(:default, :posts)
   smart_json_style(:all,
     posts: [:simple,
       author: :only_name,
@@ -72,6 +73,20 @@ class Comment < ActiveRecord::Base
   smart_json_style(:default){{content: content}}
   smart_json_style(:with_user, user: [:only_name, :with_image])
 end
+
+def json_normalize json
+  case json
+  when Hash
+    json.map{|k,v|
+      [k.to_s, json_normalize(v)] if v
+    }.compact.sort_by(&:first).to_h
+  when Array
+    json.map{|item|json_normalize item}
+  else
+    json
+  end
+end
+
 
 c0,a0 = SQLCounts.count{
   Blog.first.as_smart_json(
@@ -136,14 +151,13 @@ cans,ans = SQLCounts.count{
 cslow, = SQLCounts.count{Blog.all.as_json(as_json_option)}
 
 errors = []
-
 errors << 'JSON missmatch a0 a1' unless a0==a1
 errors << 'JSON missmatch a1 a2' unless a1==a2
 errors << 'JSON missmatch a2 a3' unless a2==a3
-errors << 'wrong JSON' unless ans[0].to_json == a0.to_json.remove(/,"[a-z]+":null/)
-errors << "ERR sql0 count: #{c0}" if c0 != 8
+errors << 'wrong JSON' unless json_normalize(ans[0]) == json_normalize(a0)
+errors << "ERR sql0 count: #{c0}" if c0 != 9
 errors << "ERR sql1 count: #{c1}" if c1 != 8
-errors << "ERR sql2 count: #{c2}" if c2 != 8
+errors << "ERR sql2 count: #{c2}" if c2 != 9
 errors << "ERR sql3 count: #{c3}" if c3 != 8
 errors << "ERR sqlANS count: #{cans}" if cans != 8
 errors << "ERR sqlSLOW count: #{cslow}" if cslow == 8
@@ -158,6 +172,16 @@ errors << ['post', post.keys] unless post.keys == [:title, :author, :comments]
 errors << ['author', author.keys] unless author.keys == [:name]
 errors << ['comment', comment.keys] unless comment.keys == [:content, :user]
 errors << ['user', user.keys] unless user.keys == [:name, :image]
+
+ucount, ujson = SQLCounts.count{
+  User.as_smart_json(:blogs)
+}
+ucount2, ujson2 = SQLCounts.count{
+  User.includes(blogs: :posts).as_json(include: {blogs: {include: :posts}})
+}
+errors << 'user wrong JSON' unless json_normalize(ujson) == json_normalize(ujson2)
+errors << "user N+1(as_smart_json) #{ucount}" unless ucount==3
+errors << "user N+1(as_json) #{ucount2}" unless ucount2==3
 
 
 if errors.blank?
