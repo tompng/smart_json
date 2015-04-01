@@ -1,6 +1,7 @@
 module SmartJSON::Util
   class << self
     def deep_merge hash, hash2
+      return hash unless hash2
       hash2.each do |key, value|
         if hash[key] && Hash === value
           deep_merge hash[key], value
