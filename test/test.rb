@@ -51,6 +51,8 @@ blogs.each do |blog|
 end
 require_relative '../lib/smart_json'
 
+unstyled_count, = SQLCounts.count{Post.as_smart_json comments: :user}
+
 class Blog < ActiveRecord::Base
   smart_json_style(:default, :posts)
   smart_json_style(:all,
@@ -151,6 +153,7 @@ cans,ans = SQLCounts.count{
 cslow, = SQLCounts.count{Blog.all.as_json(as_json_option)}
 
 errors = []
+errors << 'unstyled N+1' unless unstyled_count==3
 errors << 'JSON missmatch a0 a1' unless a0==a1
 errors << 'JSON missmatch a1 a2' unless a1==a2
 errors << 'JSON missmatch a2 a3' unless a2==a3

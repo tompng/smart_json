@@ -55,7 +55,7 @@ class SmartJSON::Definition
     symbols.each do |child|
       includes[child] ||= {}
       reflection = @klass.reflections[child.to_s] || @klass.reflections[child]
-      child_default_definition = reflection.klass.smart_json_definitions[:default]
+      child_default_definition = reflection.klass.smart_json_definitions.try :[], :default
       SmartJSON::Util.deep_merge includes[child], child_default_definition.includes_dependencies(param) if child_default_definition
     end
     hash.try :each do |key, value|
